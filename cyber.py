@@ -27,12 +27,13 @@ font = pygame.font.Font(None, 24)
 
 # Sample player stats dictionary
 player_stats = {
-    "Health": 100,
-    "Mana": 50,
     "Strength": 20,
-    "Agility": 15,
-    "Intelligence": 25,
-    "Experience": 1200
+    "Dexterity": 15,
+    "Intelligence": 17,
+    "Constitution":15,
+    "Charisma":14,
+    "Cyber":14,
+    "Hit Points": 50
 }
 
 
@@ -58,6 +59,9 @@ game_state = Game_state(0,0,game_map)
 
 
 
+#Combat Vars
+combat_timer = False
+combat_lines = []
 
 def handle_event(event):
     global input_text, output_lines
@@ -74,21 +78,28 @@ def handle_event(event):
 
 
 def render_terminal():
+    global combat_timer, combat_lines
+
     screen.fill((0, 0, 0))
 
     # Draw a green border around the screen
     pygame.draw.rect(screen, (0, 128, 0), screen.get_rect(), 2)
-    output_lines = game_state.render_current_scene()
-    output_lines = output_lines.splitlines()
-    output_lines_2 = game_state.render_npcs().splitlines()
+    output_lines = game_state.render_current_scene(player_stats)
 
+
+
+
+    if(game_state.current_scene.in_combat and combat_timer):
+        combat_lines = game_state.current_scene.combat(player_stats)
+        combat_timer = False
+    
     # Render the output lines
     y = 100
     for line in output_lines:
         text_surface = font.render(line, True, (0, 128, 0))
         screen.blit(text_surface, (100, y))
         y += text_surface.get_height()
-    for line in output_lines_2:
+    for line in combat_lines:
         text_surface = font.render(line, True, (0, 128, 0))
         screen.blit(text_surface, (100, y))
         y += text_surface.get_height()
@@ -107,11 +118,46 @@ def render_stats(screen, font, stats):
         y += stat_surface.get_height()
 
 
-
 def parse_input():
+    commands = input_text.split(" ")
+
     if not game_state.current_scene.in_combat:
-        game_state.update_player_position(input_text)
-    
+        if(commands[0].upper() == "MOVE"):
+            game_state.update_player_position(commands[1])
+    if commands[0].upper() == "ATTACK" and len(commands) > 1:
+        for npc in game_state.current_scene.npcs:
+            if(commands[1].upper() == npc.name.upper()):
+                game_state.player_attack(npc)
+
+
+
+
+
+def game_over_screen():
+
+    screen.fill((0, 0, 0))
+
+    # Draw a green border around the screen
+    pygame.draw.rect(screen, (0, 128, 0), screen.get_rect(), 2)
+
+
+    # Render the output lines
+    y = 100
+    text_surface = font.render("YOU HAVE DIED.", True, (0, 128, 0))
+    screen.blit(text_surface, (100, y))
+
+
+    # Render the input line
+    input_surface = font.render(input_text, True, (0, 128, 0))
+    screen.blit(input_surface, (100, height - input_surface.get_height()))
+
+# Define timers
+TIMER_1_INTERVAL = 5000  # Timer interval in milliseconds (e.g., 5000ms = 5 seconds)
+
+# Initialize timers
+timer_1_last_tick = pygame.time.get_ticks()
+
+
 
 # MAIN LOOP
 while True:
@@ -121,9 +167,35 @@ while True:
             exit()
         handle_event(event)
 
-    render_terminal()
-    render_stats(screen, font, player_stats)
 
+
+
+    if not game_state.game_over:
+
+
+        render_terminal()
+        render_stats(screen, font, player_stats)
+
+
+
+
+        # Check timers
+        current_time = pygame.time.get_ticks()
+
+
+
+        if current_time - timer_1_last_tick >= TIMER_1_INTERVAL:
+            combat_timer = True
+            timer_1_last_tick = current_time  # Reset the timer
+
+
+
+        #Game logic per scene.
+        game_state.current_scene.check_encounter(player_stats)
+    else:
+        game_over_screen()
+
+    
     # Render the shader
     crt_shader()
 
