@@ -38,7 +38,7 @@ player_stats = {
 
 
 
-npc_farmer = NPC('Farmer', 'humble peasent farmer toiling the fields')
+npc_farmer = NPC('Farmer', 'humble peasent farmer toiling the fields',dialog=["Hello humble traveller."], rumor=["Far to the North there is rumors of a spirit that haunts the forest."])
 
 
 
@@ -62,6 +62,10 @@ game_state = Game_state(0,0,game_map)
 #Combat Vars
 combat_timer = False
 combat_lines = []
+
+#Dialog Vars
+dialog_lines = []
+in_dialog = False
 
 def handle_event(event):
     global input_text, output_lines
@@ -95,15 +99,24 @@ def render_terminal():
     
     # Render the output lines
     y = 100
+
     for line in output_lines:
         text_surface = font.render(line, True, (0, 128, 0))
         screen.blit(text_surface, (100, y))
         y += text_surface.get_height()
+
     for line in combat_lines:
         text_surface = font.render(line, True, (0, 128, 0))
         screen.blit(text_surface, (100, y))
         y += text_surface.get_height()
 
+    if dialog_lines != []:
+        for line in dialog_lines:
+            text_surface = font.render(line, True, (0, 128, 0))
+            screen.blit(text_surface, (100, y))
+            y += text_surface.get_height()
+
+    
     # Render the input line
     input_surface = font.render(input_text, True, (0, 128, 0))
     screen.blit(input_surface, (100, height - input_surface.get_height()))
@@ -119,6 +132,8 @@ def render_stats(screen, font, stats):
 
 
 def parse_input():
+    global dialog_lines
+
     commands = input_text.split(" ")
 
     if not game_state.current_scene.in_combat:
@@ -128,6 +143,11 @@ def parse_input():
         for npc in game_state.current_scene.npcs:
             if(commands[1].upper() == npc.name.upper()):
                 game_state.player_attack(npc)
+    if commands[0].upper() == "TALK" and len(commands) > 1:
+        for npc in game_state.current_scene.npcs:
+            if(commands[1].upper() == npc.name.upper()):
+                dialog_lines = game_state.talk(npc)
+                in_dialog = True
 
 
 

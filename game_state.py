@@ -41,7 +41,7 @@ class Game_state():
 		self.current_scene = self.over_world[self.overworld_y][self.overworld_x]
 
 
-	
+
 	def render_current_scene(self,player_stats):
 		output_lines = []
 
@@ -58,6 +58,18 @@ class Game_state():
 
 		return output_lines 
 
+	def talk(self, npc):
+		output_lines = []
+
+		if npc.dialog != []:
+			output_lines = npc.dialog
+
+		return output_lines
+	def rumor(self, npc):
+		output_lines = []
+
+		if npc.rumors != []:
+			output_lines = npc.rumors
 
 	def render_npcs(self):
 		output_lines = self.current_scene.check_encounter()
