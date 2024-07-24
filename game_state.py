@@ -58,13 +58,28 @@ class Game_state():
 
 		return output_lines 
 
+
+
+	def buy(self,npc,item=None):
+		output_lines = []
+
+		if item == None:
+			output_lines.append("The " + npc.name + " has these goods for sale")
+			for item in npc.goods:
+				print(item)
+				output_lines.append(item['name'] + ": " + str(item['cost']))
+
+		return output_lines
+
 	def talk(self, npc):
 		output_lines = []
+
 
 		if npc.dialog != []:
 			output_lines = npc.dialog
 
 		return output_lines
+
 	def rumor(self, npc):
 		output_lines = []
 

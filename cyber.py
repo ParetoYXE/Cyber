@@ -38,12 +38,14 @@ player_stats = {
 
 
 
-npc_farmer = NPC('Farmer', 'humble peasent farmer toiling the fields',dialog=["Hello humble traveller."], rumor=["Far to the North there is rumors of a spirit that haunts the forest."])
+npc_farmer = NPC('Farmer', 'humble peasent farmer toiling the fields',dialog=["Hello humble traveller."], rumor=["Far to the North there is rumors of a spirit that haunts the forest."],
+    goods = [{"name":"Bread", "cost":5}])
 
 
 
 scene = Scene("You stand on the wide Southern plains. The air is still.", [npc_farmer])
 scene_2 = Scene("You've come upon a small woodland sprouting \n out from the prairie grass.")
+
 
 
 
@@ -65,7 +67,10 @@ combat_lines = []
 
 #Dialog Vars
 dialog_lines = []
+rumor_lines = []
+buy_lines = []
 in_dialog = False
+npc_in_dialog = None
 
 def handle_event(event):
     global input_text, output_lines
@@ -116,6 +121,17 @@ def render_terminal():
             screen.blit(text_surface, (100, y))
             y += text_surface.get_height()
 
+    if rumor_lines != []:
+        for line in rumor_lines:
+            text_surface = font.render(line, True, (0, 128, 0))
+            screen.blit(text_surface, (100, y))
+            y += text_surface.get_height()
+
+    if buy_lines != []:
+        for line in buy_lines:
+            text_surface = font.render(line, True, (0, 128, 0))
+            screen.blit(text_surface, (100, y))
+            y += text_surface.get_height()
     
     # Render the input line
     input_surface = font.render(input_text, True, (0, 128, 0))
@@ -132,22 +148,40 @@ def render_stats(screen, font, stats):
 
 
 def parse_input():
-    global dialog_lines
+    global dialog_lines, in_dialog, npc_in_dialog, rumor_lines, buy_lines
 
     commands = input_text.split(" ")
+
 
     if not game_state.current_scene.in_combat:
         if(commands[0].upper() == "MOVE"):
             game_state.update_player_position(commands[1])
+            #Once you move you need to reset any dialog/npc interactions
+            dialog_lines = []
+            rumor_lines = []
+            npc_in_dialog = None
+            in_dialog = False
+
     if commands[0].upper() == "ATTACK" and len(commands) > 1:
         for npc in game_state.current_scene.npcs:
             if(commands[1].upper() == npc.name.upper()):
                 game_state.player_attack(npc)
+
     if commands[0].upper() == "TALK" and len(commands) > 1:
         for npc in game_state.current_scene.npcs:
             if(commands[1].upper() == npc.name.upper()):
+                print(npc.dialog)
                 dialog_lines = game_state.talk(npc)
                 in_dialog = True
+                npc_in_dialog = npc
+
+    if commands[0].upper() == "RUMOR" and in_dialog == True:
+        if npc_in_dialog.rumor != []:
+            rumor_lines = npc_in_dialog.rumor
+
+    if commands[0].upper() == "BUY" and in_dialog == True:
+        if npc_in_dialog.goods != []:
+            buy_lines = game_state.buy(npc_in_dialog)
 
 
 
