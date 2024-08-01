@@ -25,7 +25,7 @@ output_lines = []
 # Create a font
 font = pygame.font.Font(None, 24)
 
-# Sample player stats dictionary
+# Player stats dictionary
 player_stats = {
     "Strength": 20,
     "Dexterity": 15,
@@ -33,8 +33,14 @@ player_stats = {
     "Constitution":15,
     "Charisma":14,
     "Cyber":14,
-    "Hit Points": 50
+    "Hit Points": 50,
+    "Gold": 25,
+    "Food": 50,
+    "Inventory":[],
+    "Weapon":None,
+    "Armor":None
 }
+
 
 
 
@@ -69,6 +75,7 @@ combat_lines = []
 dialog_lines = []
 rumor_lines = []
 buy_lines = []
+inventory_lines = []
 in_dialog = False
 npc_in_dialog = None
 
@@ -132,6 +139,13 @@ def render_terminal():
             text_surface = font.render(line, True, (0, 128, 0))
             screen.blit(text_surface, (100, y))
             y += text_surface.get_height()
+
+    if inventory_lines != []:
+        for line in inventory_lines:
+            text_surface = font.render(line, True, (0, 128, 0))
+            screen.blit(text_surface, (100, y))
+            y += text_surface.get_height()
+
     
     # Render the input line
     input_surface = font.render(input_text, True, (0, 128, 0))
@@ -142,13 +156,14 @@ def render_stats(screen, font, stats):
     x = VIRTUAL_RES[0] - 150  # Position the stats on the right side of the screen
     y = 100
     for key, value in stats.items():
-        stat_surface = font.render(f"{key}: {value}", True, (0, 128, 0))
-        screen.blit(stat_surface, (x, y))
-        y += stat_surface.get_height()
+        if key != "Inventory":
+            stat_surface = font.render(f"{key}: {value}", True, (0, 128, 0))
+            screen.blit(stat_surface, (x, y))
+            y += stat_surface.get_height()
 
 
 def parse_input():
-    global dialog_lines, in_dialog, npc_in_dialog, rumor_lines, buy_lines
+    global dialog_lines, in_dialog, npc_in_dialog, rumor_lines, buy_lines, inventory_lines
 
     commands = input_text.split(" ")
 
@@ -159,6 +174,7 @@ def parse_input():
             #Once you move you need to reset any dialog/npc interactions
             dialog_lines = []
             rumor_lines = []
+            inventory_lines = []
             npc_in_dialog = None
             in_dialog = False
 
@@ -181,8 +197,19 @@ def parse_input():
 
     if commands[0].upper() == "BUY" and in_dialog == True:
         if npc_in_dialog.goods != []:
-            buy_lines = game_state.buy(npc_in_dialog)
+            if len(commands) == 1:
+                buy_lines = game_state.buy(npc_in_dialog,player_stats)
+            else:
+                buy_lines = game_state.buy(npc_in_dialog,player_stats,commands[1])
 
+    if commands[0].upper() == "INVENTORY":
+        inventory_lines.append("--------------------------------------")
+        for i in player_stats["Inventory"]:
+            inventory_lines.append(i['name'])
+        inventory_lines.append("--------------------------------------")
+
+    if commands[0].upper() == "EQUIP":
+        
 
 
 
@@ -207,9 +234,11 @@ def game_over_screen():
 
 # Define timers
 TIMER_1_INTERVAL = 5000  # Timer interval in milliseconds (e.g., 5000ms = 5 seconds)
-
+TIMER_FOOD_CONSUMPTION = 10000
 # Initialize timers
 timer_1_last_tick = pygame.time.get_ticks()
+timer_food_consumption = pygame.time.get_ticks()
+
 
 
 
@@ -241,6 +270,10 @@ while True:
         if current_time - timer_1_last_tick >= TIMER_1_INTERVAL:
             combat_timer = True
             timer_1_last_tick = current_time  # Reset the timer
+
+        if current_time - timer_food_consumption >= TIMER_FOOD_CONSUMPTION:
+            game_state.eat(player_stats)
+            timer_food_consumption = current_time
 
 
 

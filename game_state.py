@@ -56,19 +56,26 @@ class Game_state():
 
 
 
+
 		return output_lines 
 
 
 
-	def buy(self,npc,item=None):
+	def buy(self,npc,player_stats,item_command=None):
 		output_lines = []
 
-		if item == None:
+		if item_command == None:
 			output_lines.append("The " + npc.name + " has these goods for sale")
 			for item in npc.goods:
 				print(item)
 				output_lines.append(item['name'] + ": " + str(item['cost']))
-
+		else:
+			for item in npc.goods:
+				if item['name'].upper() == item_command.upper():
+					if player_stats['Gold'] >= item['cost']:
+						player_stats['Gold'] -= item['cost']
+						player_stats['Inventory'].append(item)
+		
 		return output_lines
 
 	def talk(self, npc):
@@ -79,6 +86,15 @@ class Game_state():
 			output_lines = npc.dialog
 
 		return output_lines
+
+
+	def eat(self,player_stats):
+		if(player_stats['Food'] > 0):
+			player_stats['Food'] -= 1
+		else:
+			player_stats['Hit Points'] -= random.randint(0,1)
+
+
 
 	def rumor(self, npc):
 		output_lines = []
