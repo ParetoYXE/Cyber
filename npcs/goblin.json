@@ -1,0 +1,9 @@
+{
+  "name": "Goblin",
+  "description": "A small disgusting Goblin.",
+  "dialog": ["TASTY TREAT."],
+  "rumor": [],
+  "goods": [],
+  "hostile":"True",
+  "hp":20
+}

@@ -1,4 +1,4 @@
-import pygame
+import pygame, json, os
 from game_state import *
 from npc import *
 from scene import *
@@ -42,10 +42,18 @@ player_stats = {
 }
 
 
+# # Load the JSON file
+# with open('farmer.json', 'r') as file:
+#     farmer_data = json.load(file)
 
+# npc_farmer =  NPC(
+#     name=farmer_data['name'],
+#     description=farmer_data['description'],
+#     dialog=farmer_data.get('dialog', []),
+#     rumor=farmer_data.get('rumor', []),
+#     goods=farmer_data.get('goods', [])
+#     )
 
-npc_farmer = NPC('Farmer', 'humble peasent farmer toiling the fields',dialog=["Hello humble traveller."], rumor=["Far to the North there is rumors of a spirit that haunts the forest."],
-    goods = [{"name":"Bread", "cost":5, 'type':'Food', 'value':3}])
 
 
 
@@ -55,21 +63,9 @@ player_stats['Inventory'].append(Sword_item)
 
 
 
-scene = Scene("You stand on the wide Southern plains. The air is still.", [npc_farmer])
-scene_2 = Scene("You've come upon a small woodland sprouting \n out from the prairie grass.")
 
 
 
-
-game_map = [
-            
-            [scene],
-
-            [scene_2]
-
-            ]
-
-game_state = Game_state(0,0,game_map)
 
 
 
@@ -85,6 +81,92 @@ inventory_lines = []
 player_attack_lines = []
 in_dialog = False
 npc_in_dialog = None
+
+
+
+def load_npcs_from_folder(folder_path):
+    npc_dict = {}
+
+    # Loop through all files in the directory
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.json'):
+            file_path = os.path.join(folder_path, filename)
+            
+            # Load the JSON data
+            with open(file_path, 'r') as file:
+                npc_data = json.load(file)
+                
+                # Create an NPC object
+                npc = NPC(
+                    name=npc_data['name'],
+                    description=npc_data['description'],
+                    dialog=npc_data.get('dialog', []),
+                    rumor=npc_data.get('rumor', []),
+                    goods=npc_data.get('goods', []),
+                    hostile=npc_data.get('hostile',False)
+                )
+                
+                # Store the NPC object in the dictionary with the name as the key
+                npc_dict[npc.name] = npc
+
+    return npc_dict
+
+
+# Function to load all JSON files in the 'scenes' folder and create Scene objects
+def load_scenes_from_folder(folder_path, npc_dict):
+    scene_dict = {}
+
+    # Loop through all files in the directory
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.json'):
+            file_path = os.path.join(folder_path, filename)
+            
+            # Load the JSON data
+            with open(file_path, 'r') as file:
+                scene_data = json.load(file)
+                
+                # Get NPC objects from the NPC names in the JSON
+                npcs = [npc_dict[npc_name] for npc_name in scene_data.get('npcs', [])]
+                
+                # Create a Scene object
+                scene = Scene(
+                    name=scene_data['name'],
+                    description=scene_data['description'],
+                    npcs=npcs
+                )
+                
+                # Store the Scene object in the dictionary
+                scene_dict[scene.name] = scene
+
+    return scene_dict
+
+
+
+
+
+
+# Load all NPCs from the 'npcs' folder
+npc_folder_path = 'npcs'
+npc_dict = load_npcs_from_folder(npc_folder_path)
+
+# Load all Scenes from the 'scenes' folder
+scene_folder_path = 'scenes'
+scene_dict = load_scenes_from_folder(scene_folder_path, npc_dict)
+
+print(scene_dict)
+
+
+game_map = [
+            
+            [scene_dict['Woods'],scene_dict['Woods'],scene_dict['Woods']],
+
+            [scene_dict['Plains'],scene_dict['Plains'],scene_dict['Plains']]
+
+            ]
+
+game_state = Game_state(0,1,game_map)
+
+
 
 def handle_event(event):
     global input_text, output_lines

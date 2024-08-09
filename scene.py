@@ -2,7 +2,8 @@ import random
 
 class Scene():
 
-	def __init__(self, description, npcs = None):
+	def __init__(self, name,description, npcs = None):
+		self.name = name
 		self.description = description
 		self.npcs = npcs
 		self.in_combat = False

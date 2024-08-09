@@ -1,0 +1,14 @@
+{
+  "name": "Farmer",
+  "description": "humble peasant farmer toiling the fields",
+  "dialog": ["'Hello humble traveller.'"],
+  "rumor": ["'Far to the North there are rumors of a spirit that haunts the forest.'"],
+  "goods": [
+    {
+      "name": "Bread",
+      "cost": 5,
+      "type": "Food",
+      "value": 3
+    }
+  ]
+}
