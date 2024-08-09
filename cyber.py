@@ -49,7 +49,7 @@ npc_farmer = NPC('Farmer', 'humble peasent farmer toiling the fields',dialog=["H
 
 
 
-Sword_item = {"name":'Short Sword', "type":"Weapon"}
+Sword_item = {"name":'Short Sword', "type":"Weapon", "damage":4}
 
 player_stats['Inventory'].append(Sword_item)
 
@@ -82,6 +82,7 @@ dialog_lines = []
 rumor_lines = []
 buy_lines = []
 inventory_lines = []
+player_attack_lines = []
 in_dialog = False
 npc_in_dialog = None
 
@@ -100,7 +101,7 @@ def handle_event(event):
 
 
 def render_terminal():
-    global combat_timer, combat_lines
+    global combat_timer, combat_lines, player_attack_lines
 
     screen.fill((0, 0, 0))
 
@@ -113,6 +114,7 @@ def render_terminal():
 
     if(game_state.current_scene.in_combat and combat_timer):
         combat_lines = game_state.current_scene.combat(player_stats)
+        player_attack_lines = []
         combat_timer = False
     
     # Render the output lines
@@ -124,6 +126,10 @@ def render_terminal():
         y += text_surface.get_height()
 
     for line in combat_lines:
+        text_surface = font.render(line, True, (0, 128, 0))
+        screen.blit(text_surface, (100, y))
+        y += text_surface.get_height()
+    for line in player_attack_lines:
         text_surface = font.render(line, True, (0, 128, 0))
         screen.blit(text_surface, (100, y))
         y += text_surface.get_height()
@@ -159,7 +165,7 @@ def render_terminal():
 
 
 def render_stats(screen, font, stats):
-    x = VIRTUAL_RES[0] - 150  # Position the stats on the right side of the screen
+    x = VIRTUAL_RES[0] - 200  # Position the stats on the right side of the screen
     y = 100
     for key, value in stats.items():
         if key != "Inventory" and key != "Weapon":
@@ -176,7 +182,7 @@ def render_stats(screen, font, stats):
             y += stat_surface.get_height()
 
 def parse_input():
-    global dialog_lines, in_dialog, npc_in_dialog, rumor_lines, buy_lines, inventory_lines
+    global dialog_lines, in_dialog, npc_in_dialog, rumor_lines, buy_lines, inventory_lines, player_attack_lines
 
     commands = input_text.split(" ")
 
@@ -188,13 +194,14 @@ def parse_input():
             dialog_lines = []
             rumor_lines = []
             inventory_lines = []
+            player_attack_lines = []
             npc_in_dialog = None
             in_dialog = False
 
     if commands[0].upper() == "ATTACK" and len(commands) > 1:
         for npc in game_state.current_scene.npcs:
             if(commands[1].upper() == npc.name.upper()):
-                game_state.player_attack(npc)
+                player_attack_lines = game_state.player_attack(npc,player_stats)
 
     if commands[0].upper() == "TALK" and len(commands) > 1:
         for npc in game_state.current_scene.npcs:
@@ -220,6 +227,15 @@ def parse_input():
         for i in player_stats["Inventory"]:
             inventory_lines.append(i['name'])
         inventory_lines.append("--------------------------------------")
+    
+    if commands[0].upper() == "EAT" and len(commands) > 1:
+        food = commands[1].upper()
+
+        for item in player_stats["Inventory"]:
+            if item['name'].upper() == food and item['type'] == "Food":
+                player_stats['Food'] += item['value']
+
+                player_stats['Inventory'].remove(item)
 
     if commands[0].upper() == "EQUIP" and len(commands) > 1:
         if len(commands) == 3:
@@ -227,7 +243,6 @@ def parse_input():
         else:
             item_equip = commands[1].upper()
 
-        print(item_equip)
         for item in player_stats['Inventory']:
             if item['name'].upper() == item_equip:
                 item_type = item['type']

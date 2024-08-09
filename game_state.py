@@ -24,16 +24,21 @@ class Game_state():
 		self.update_current_scene()
 
 
-	def player_attack(self,npc):
+	def player_attack(self,npc,player_stats):
 		self.current_scene.in_combat = True
 		
 		self.current_scene.npc_combat = npc
 
 		npc.hostile = True
 
-		npc.hp -= random.randint(1,3)
+		damage = random.randint(1, round(player_stats['Strength'] / 5))
+
+		if player_stats['Weapon'] != None:
+			damage += player_stats['Weapon']['damage']
+
+		npc.hp -= damage
 		
-		print("You hit " + npc.name)
+		return ["You hit " + npc.name + " for " + str(damage)]
 
 
 
