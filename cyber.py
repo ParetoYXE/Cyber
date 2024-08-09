@@ -45,7 +45,13 @@ player_stats = {
 
 
 npc_farmer = NPC('Farmer', 'humble peasent farmer toiling the fields',dialog=["Hello humble traveller."], rumor=["Far to the North there is rumors of a spirit that haunts the forest."],
-    goods = [{"name":"Bread", "cost":5}])
+    goods = [{"name":"Bread", "cost":5, 'type':'Food', 'value':3}])
+
+
+
+Sword_item = {"name":'Short Sword', "type":"Weapon"}
+
+player_stats['Inventory'].append(Sword_item)
 
 
 
@@ -156,11 +162,18 @@ def render_stats(screen, font, stats):
     x = VIRTUAL_RES[0] - 150  # Position the stats on the right side of the screen
     y = 100
     for key, value in stats.items():
-        if key != "Inventory":
+        if key != "Inventory" and key != "Weapon":
             stat_surface = font.render(f"{key}: {value}", True, (0, 128, 0))
             screen.blit(stat_surface, (x, y))
             y += stat_surface.get_height()
-
+        elif key == "Weapon":
+            if value != None:
+                stat_surface = font.render(f"{key}: {value['name']}", True, (0, 128, 0))
+            else:
+                stat_surface = font.render(f"{key}: {value}", True, (0, 128, 0))
+            
+            screen.blit(stat_surface, (x, y))
+            y += stat_surface.get_height()
 
 def parse_input():
     global dialog_lines, in_dialog, npc_in_dialog, rumor_lines, buy_lines, inventory_lines
@@ -208,7 +221,19 @@ def parse_input():
             inventory_lines.append(i['name'])
         inventory_lines.append("--------------------------------------")
 
-    if commands[0].upper() == "EQUIP":
+    if commands[0].upper() == "EQUIP" and len(commands) > 1:
+        if len(commands) == 3:
+            item_equip  = commands[1].upper() + " " + commands[2].upper()
+        else:
+            item_equip = commands[1].upper()
+
+        print(item_equip)
+        for item in player_stats['Inventory']:
+            if item['name'].upper() == item_equip:
+                item_type = item['type']
+                if item_type in player_stats:
+                    player_stats[item_type] = item
+
         
 
 
