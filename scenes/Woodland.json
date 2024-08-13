@@ -1,5 +1,24 @@
 {
   "name":"Woods",
-  "description": "You've come upon a small woodland \n sprouting out from the prairie grass..",
-  "npcs": ["Goblin"]
+  "description": [
+    "A cluster of trees stands tall in the open moor.",
+    "Low shrubs and scattered trees break the flat landscape.",
+    "A small group of pines rises from the grassy moor.",
+    "Bushes and a few trees create a sheltered spot.",
+    "A patch of dense undergrowth in the middle of the moor.",
+    "A quiet grove of oaks offers some shade.",
+    "Thick grass and a few saplings cover the ground.",
+    "A small wooded area interrupts the open plains.",
+    "A tangle of bushes and young trees ahead.",
+    "A lone tree stands surrounded by thick grass."
+  ]
+  ,
+  "npcs": [],
+  "random_encounters":[
+    {
+      "enemy":"Goblin",
+      "chance":10
+
+    }
+  ]
 }

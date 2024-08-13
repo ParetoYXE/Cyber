@@ -1,0 +1,12 @@
+{
+  "name":"Old Church",
+  "description": ["An old ailing church stands partially \n covered by a dense thicket alone on a hilltop."],
+  "npcs": [],
+  "random_encounters":[
+    {
+      "enemy":"Wright",
+      "chance":25
+
+    }
+  ]
+}

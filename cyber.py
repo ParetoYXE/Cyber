@@ -1,4 +1,4 @@
-import pygame, json, os
+import pygame, json, os,copy
 from game_state import *
 from npc import *
 from scene import *
@@ -128,18 +128,42 @@ def load_scenes_from_folder(folder_path, npc_dict):
                 # Get NPC objects from the NPC names in the JSON
                 npcs = [npc_dict[npc_name] for npc_name in scene_data.get('npcs', [])]
                 
+                random_encounter_npcs = []
+
+                for i in scene_data['random_encounters']:
+                    random_encounter_npcs.append(npc_dict[i['enemy']])
+
                 # Create a Scene object
                 scene = Scene(
                     name=scene_data['name'],
                     description=scene_data['description'],
-                    npcs=npcs
+                    npcs=npcs,
+                    random_encounters=scene_data['random_encounters'],
+                    random_encounter_npcs = random_encounter_npcs
                 )
+
+                
                 
                 # Store the Scene object in the dictionary
                 scene_dict[scene.name] = scene
 
     return scene_dict
 
+
+def generate_random_map(scene_dict, grid_size=10):
+    scene_names = list(scene_dict.keys())  # Get all available scene names
+    game_map = []
+
+    for _ in range(grid_size):
+        row = []
+        for _ in range(grid_size):
+            # Randomly select a scene name
+            selected_scene_name = random.choice(scene_names)
+            # Deep copy the scene object to ensure it's an independent instance
+            row.append(copy.deepcopy(scene_dict[selected_scene_name]))
+        game_map.append(row)
+    
+    return game_map
 
 
 
@@ -153,16 +177,22 @@ npc_dict = load_npcs_from_folder(npc_folder_path)
 scene_folder_path = 'scenes'
 scene_dict = load_scenes_from_folder(scene_folder_path, npc_dict)
 
+
+
+
+game_map = generate_random_map(scene_dict, grid_size=10)
+
+print(npc_dict)
 print(scene_dict)
 
+game_map[0][2] = scene_dict['Old Church']
 
-game_map = [
-            
-            [scene_dict['Woods'],scene_dict['Woods'],scene_dict['Woods']],
 
-            [scene_dict['Plains'],scene_dict['Plains'],scene_dict['Plains']]
 
-            ]
+
+for row in game_map:
+    for region in row:
+        region.description_index = random.randint(0,len(region.description) - 1)
 
 game_state = Game_state(0,1,game_map)
 
@@ -282,7 +312,7 @@ def parse_input():
 
     if commands[0].upper() == "ATTACK" and len(commands) > 1:
         for npc in game_state.current_scene.npcs:
-            if(commands[1].upper() == npc.name.upper()):
+            if(commands[1].upper() == npc.name.upper() and npc.hp > 0):
                 player_attack_lines = game_state.player_attack(npc,player_stats)
 
     if commands[0].upper() == "TALK" and len(commands) > 1:
@@ -311,7 +341,10 @@ def parse_input():
         inventory_lines.append("--------------------------------------")
     
     if commands[0].upper() == "EAT" and len(commands) > 1:
-        food = commands[1].upper()
+        if len(commands) > 2:
+            food = commands[1].upper() + " " + commands[2].upper()
+        else:
+            food = commands[1].upper()
 
         for item in player_stats["Inventory"]:
             if item['name'].upper() == food and item['type'] == "Food":
@@ -330,6 +363,29 @@ def parse_input():
                 item_type = item['type']
                 if item_type in player_stats:
                     player_stats[item_type] = item
+
+    if commands[0].upper() == "LOOT":
+        if len(commands) > 1:
+            npc_loot = commands[1]
+            for npc in game_state.current_scene.npcs:
+                if npc.name.upper() == npc_loot.upper() and npc.hp <= 0:
+                    inventory_lines.append("--------------------------------------")
+                    inventory_lines.append("You loot " + npc_loot + " and receive")
+                    
+                    for item in npc.goods:
+                        inventory_lines.append(item['name'])
+                        player_stats['Inventory'].append(item)
+                    inventory_lines.append("--------------------------------------")
+
+
+        else:
+            for npc in game_state.current_scene.npcs:
+                if npc.hp <= 0:
+                    inventory_lines.append("--------------------------------------")
+                    inventory_lines.append("Lootable NPCS")
+                    inventory_lines.append(npc.name)
+
+
 
         
 
@@ -354,12 +410,18 @@ def game_over_screen():
     input_surface = font.render(input_text, True, (0, 128, 0))
     screen.blit(input_surface, (100, height - input_surface.get_height()))
 
+
 # Define timers
 TIMER_1_INTERVAL = 5000  # Timer interval in milliseconds (e.g., 5000ms = 5 seconds)
 TIMER_FOOD_CONSUMPTION = 10000
+TIMER_RANDOM_ENCOUNTER = 5000
+
+
+
 # Initialize timers
 timer_1_last_tick = pygame.time.get_ticks()
 timer_food_consumption = pygame.time.get_ticks()
+timer_random_encounter = pygame.time.get_ticks()
 
 
 
@@ -393,9 +455,17 @@ while True:
             combat_timer = True
             timer_1_last_tick = current_time  # Reset the timer
 
+          
+
         if current_time - timer_food_consumption >= TIMER_FOOD_CONSUMPTION:
             game_state.eat(player_stats)
             timer_food_consumption = current_time
+
+        # if current_time - timer_random_encounter >= TIMER_RANDOM_ENCOUNTER:
+        #     game_state.current_scene.random_encounter()
+        #     timer_random_encounter = current_time
+
+
 
 
 

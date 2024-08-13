@@ -1,5 +1,6 @@
 {
   "name":"Plains",
-  "description": "You stand on the wide Southern plains. The air is still.",
-  "npcs": ["Farmer"]
+  "description": ["You stand on the wide Southern plains. The air is still."],
+  "npcs": ["Farmer"],
+  "random_encounters":[]
 }

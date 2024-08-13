@@ -12,6 +12,7 @@ class Game_state():
 
 
 	def update_player_position(self,direction):
+
 		if direction.upper() == 'NORTH':
 			self.overworld_y -= 1
 		elif direction.upper() == 'EAST':
@@ -40,17 +41,15 @@ class Game_state():
 		
 		return ["You hit " + npc.name + " for " + str(damage)]
 
-
-
 	def update_current_scene(self):
 		self.current_scene = self.over_world[self.overworld_y][self.overworld_x]
-
+		print(self.current_scene.name)
+		self.current_scene.random_encounter()
 
 
 	def render_current_scene(self,player_stats):
 		output_lines = []
-
-		output_lines = self.current_scene.description.splitlines()
+		output_lines = self.current_scene.description[self.current_scene.description_index].splitlines()
 
 		if player_stats['Hit Points'] <= 0:
 			self.game_over = True

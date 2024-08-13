@@ -1,9 +1,16 @@
 {
   "name": "Goblin",
-  "description": "A small disgusting Goblin.",
+  "description": "small disgusting Goblin.",
   "dialog": ["TASTY TREAT."],
   "rumor": [],
-  "goods": [],
+  "goods": [
+     {
+      "name": "Rotten Meat",
+      "cost": 2,
+      "type": "Food",
+      "value": 1
+    }
+  ],
   "hostile":"True",
   "hp":20
 }

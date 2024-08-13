@@ -1,0 +1,16 @@
+{
+  "name": "Wright",
+  "description": "horrifying spirit draped in a shadow with red glowing eyes.",
+  "dialog": ["BEGONE"],
+  "rumor": [],
+  "goods": [
+     {
+      "name": "Old Scroll",
+      "cost": 200,
+      "type": "Magic_Scroll",
+      "value": 100
+    }
+  ],
+  "hostile":"True",
+  "hp":120
+}

@@ -3,6 +3,7 @@ class NPC():
 		self.name = name
 		self.description = description
 		self.hostile = hostile
+		self.max_hp = hp
 		self.hp = hp
 		self.dialog = dialog
 		self.rumor = rumor
