@@ -1,0 +1,17 @@
+{
+  "name":"Moorland",
+  "description": [
+          "Endless stretches of grass and heather, \n dotted with rocky outcrops.",
+          "A vast, open landscape with wind-swept hills \n and scattered patches of wildflowers.",
+          "Low, rolling hills covered in dry grass, \n with a few hardy shrubs clinging to the soil.",
+          "Flat, expansive moorland with a mix of \n tall grass and small, jagged rocks.",
+          "A desolate moor with a distant line of trees, \n barely visible on the horizon.",
+          "Rough terrain with uneven ground, \n where the wind whistles through the sparse brush.",
+          "An open moor, with small, scattered boulders \n breaking the monotony of the landscape.",
+          "A bleak, windswept moor, \n with patches of thorny bushes and coarse grass.",
+          "A wide, barren moor, with only the sound of \n rustling grass to break the silence.",
+          "A lonely expanse of moorland, \n where the ground is soft underfoot and the air is cool."
+        ],
+  "npcs": [],
+  "random_encounters":[]
+}

@@ -2,7 +2,7 @@ import random
 
 class Scene():
 
-	def __init__(self, name,description, npcs = None, random_encounters = None, random_encounter_npcs = None):
+	def __init__(self, name,description, npcs = None, random_encounters = None, random_encounter_npcs = None, image = None):
 		self.name = name
 		self.description = description
 		self.description_index = 0
@@ -12,6 +12,7 @@ class Scene():
 		self.random_encounters = random_encounters
 		self.random_encounter_npcs = random_encounter_npcs
 		self.random_encounter_trigger = False
+		self.image = image
 
 	def check_encounter(self,player_stats):
 		if self.npcs != None:

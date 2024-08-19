@@ -1,5 +1,5 @@
 {
-  "name":"Woods",
+  "name":"Valley",
   "description": [
     "A cluster of trees stands tall in the open moor.",
     "Low shrubs and scattered trees break the flat landscape.",
@@ -20,5 +20,5 @@
 
     }
   ],
-  "image":"Wood_Land.png"
+  "image":"Valley.png"
 }

@@ -1,6 +1,7 @@
 {
-  "name":"Hill Plains",
+  "name":"Hill_land",
   "description": ["A region of small rolling hills dotted with a handful of trees."],
   "npcs": [],
-  "random_encounters":[]
+  "random_encounters":[],
+  "image":"Hillland.png"
 }

@@ -64,7 +64,10 @@ player_stats['Inventory'].append(Sword_item)
 
 
 
+wood_land_image = pygame.image.load("Wood_land.png")
+wood_land_image = pygame.transform.scale(wood_land_image,(450,200))
 
+moorland_image = pygame.transform.scale(pygame.image.load('Moorland.png'),(450,200))
 
 
 
@@ -133,13 +136,20 @@ def load_scenes_from_folder(folder_path, npc_dict):
                 for i in scene_data['random_encounters']:
                     random_encounter_npcs.append(npc_dict[i['enemy']])
 
+
+                scene_image = None
+
+                if 'image' in scene_data:
+                    scene_image = pygame.transform.scale(pygame.image.load(scene_data['image']),(450,200))
+
                 # Create a Scene object
                 scene = Scene(
                     name=scene_data['name'],
                     description=scene_data['description'],
                     npcs=npcs,
                     random_encounters=scene_data['random_encounters'],
-                    random_encounter_npcs = random_encounter_npcs
+                    random_encounter_npcs = random_encounter_npcs,
+                    image=scene_image
                 )
 
                 
@@ -150,15 +160,15 @@ def load_scenes_from_folder(folder_path, npc_dict):
     return scene_dict
 
 
-def generate_random_map(scene_dict, grid_size=10):
+def generate_map(scene_dict, grid_size=10):
     scene_names = list(scene_dict.keys())  # Get all available scene names
     game_map = []
 
     for _ in range(grid_size):
         row = []
         for _ in range(grid_size):
-            # Randomly select a scene name
-            selected_scene_name = random.choice(scene_names)
+            # Select the default scene name
+            selected_scene_name = "Moorland"
             # Deep copy the scene object to ensure it's an independent instance
             row.append(copy.deepcopy(scene_dict[selected_scene_name]))
         game_map.append(row)
@@ -180,12 +190,16 @@ scene_dict = load_scenes_from_folder(scene_folder_path, npc_dict)
 
 
 
-game_map = generate_random_map(scene_dict, grid_size=10)
+game_map = generate_map(scene_dict, grid_size=10)
 
-print(npc_dict)
-print(scene_dict)
 
-game_map[0][2] = scene_dict['Old Church']
+
+game_map[9][4] = scene_dict['Hill_land']
+game_map[9][5] = scene_dict['Valley']
+game_map[9][6] = scene_dict['Hill_land']
+game_map[8][5] = scene_dict['Valley_2']
+game_map[7][5] = scene_dict['Old_Mill']
+
 
 
 
@@ -194,7 +208,7 @@ for row in game_map:
     for region in row:
         region.description_index = random.randint(0,len(region.description) - 1)
 
-game_state = Game_state(0,1,game_map)
+game_state = Game_state(5,9,game_map)
 
 
 
@@ -211,6 +225,14 @@ def handle_event(event):
         else:
             input_text += event.unicode
 
+
+
+
+def render_graphics():
+    if game_state.current_scene.image == None:
+        screen.blit(moorland_image,(100,100))
+    else:
+        screen.blit(game_state.current_scene.image,(100,100))
 
 def render_terminal():
     global combat_timer, combat_lines, player_attack_lines
@@ -230,7 +252,7 @@ def render_terminal():
         combat_timer = False
     
     # Render the output lines
-    y = 100
+    y = 350
 
     for line in output_lines:
         text_surface = font.render(line, True, (0, 128, 0))
@@ -279,6 +301,8 @@ def render_terminal():
 def render_stats(screen, font, stats):
     x = VIRTUAL_RES[0] - 200  # Position the stats on the right side of the screen
     y = 100
+    stats["X"] = game_state.overworld_x
+    stats["Y"] = game_state.overworld_y
     for key, value in stats.items():
         if key != "Inventory" and key != "Weapon":
             stat_surface = font.render(f"{key}: {value}", True, (0, 128, 0))
@@ -439,10 +463,10 @@ while True:
 
     if not game_state.game_over:
 
-
+        
         render_terminal()
         render_stats(screen, font, player_stats)
-
+        render_graphics()
 
 
 
