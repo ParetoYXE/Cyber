@@ -9,6 +9,7 @@ class Game_state():
 		self.over_world = over_world_map
 		self.current_scene = over_world_map[self.overworld_y][self.overworld_x]
 		self.game_over = False
+		self.in_camp = False
 
 
 	def update_player_position(self,direction):
@@ -39,6 +40,7 @@ class Game_state():
 
 		npc.hp -= damage
 		
+
 		return ["You hit " + npc.name + " for " + str(damage)]
 
 	def update_current_scene(self):
@@ -113,3 +115,6 @@ class Game_state():
 
 	def check_encounters(self):
 		self.current_scene.check_encounter()
+
+	def camp(self):
+		pass

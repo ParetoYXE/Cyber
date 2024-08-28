@@ -10,5 +10,8 @@
       "type": "Food",
       "value": 3
     }
-  ]
+  ],
+  "image":"farmer.png",
+  "damage":[3,7] ,
+  "hp":15
 }

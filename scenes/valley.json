@@ -12,13 +12,7 @@
     "A tangle of bushes and young trees ahead."
   ]
   ,
-  "npcs": [],
-  "random_encounters":[
-    {
-      "enemy":"Goblin",
-      "chance":10
-
-    }
-  ],
+  "npcs": ["Farmer"],
+  "random_encounters":[],
   "image":"Valley.png"
 }

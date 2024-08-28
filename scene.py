@@ -2,7 +2,7 @@ import random
 
 class Scene():
 
-	def __init__(self, name,description, npcs = None, random_encounters = None, random_encounter_npcs = None, image = None):
+	def __init__(self, name,description, npcs = None, random_encounters = None, random_encounter_npcs = None, image = None, buildings = []):
 		self.name = name
 		self.description = description
 		self.description_index = 0
@@ -13,6 +13,7 @@ class Scene():
 		self.random_encounter_npcs = random_encounter_npcs
 		self.random_encounter_trigger = False
 		self.image = image
+		self.buildings = []
 
 	def check_encounter(self,player_stats):
 		if self.npcs != None:
@@ -54,7 +55,7 @@ class Scene():
 
 			output_lines.append("You are in combat with a " + enemy.description)
 			
-			damage = random.randint(1,5)
+			damage = random.randint(enemy.damage[0],enemy.damage[1])
 
 			player_stats['Hit Points'] -= damage
 

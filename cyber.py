@@ -34,6 +34,7 @@ player_stats = {
     "Charisma":14,
     "Cyber":14,
     "Hit Points": 50,
+    "Max_Hit_Points":50,
     "Gold": 25,
     "Food": 50,
     "Inventory":[],
@@ -69,7 +70,7 @@ wood_land_image = pygame.transform.scale(wood_land_image,(450,200))
 
 moorland_image = pygame.transform.scale(pygame.image.load('Moorland.png'),(450,200))
 
-
+camp_image = pygame.image.load("camp.png")
 
 
 #Combat Vars
@@ -99,6 +100,11 @@ def load_npcs_from_folder(folder_path):
             with open(file_path, 'r') as file:
                 npc_data = json.load(file)
                 
+                npc_image = None
+
+                if 'image' in npc_data:
+                    npc_image = pygame.image.load(npc_data.get('image'))
+
                 # Create an NPC object
                 npc = NPC(
                     name=npc_data['name'],
@@ -106,7 +112,10 @@ def load_npcs_from_folder(folder_path):
                     dialog=npc_data.get('dialog', []),
                     rumor=npc_data.get('rumor', []),
                     goods=npc_data.get('goods', []),
-                    hostile=npc_data.get('hostile',False)
+                    hostile=npc_data.get('hostile',False),
+                    image=npc_image,
+                    hp=npc_data.get('hp',10),
+                    damage=npc_data.get('damage')
                 )
                 
                 # Store the NPC object in the dictionary with the name as the key
@@ -234,6 +243,22 @@ def render_graphics():
     else:
         screen.blit(game_state.current_scene.image,(100,100))
 
+    if game_state.current_scene.in_combat:
+        npc_image = pygame.transform.scale(game_state.current_scene.npc_combat.image,(125,200))
+        screen.blit(npc_image,(275,150))
+
+    if game_state.current_scene.npcs != None:
+        for npc in game_state.current_scene.npcs:
+            npc_image = pygame.transform.scale(npc.image,(125,200))
+            screen.blit(npc_image,(275,150))
+
+
+def render_camp():
+    screen.blit(camp_image,(100,100))
+
+
+
+
 def render_terminal():
     global combat_timer, combat_lines, player_attack_lines
 
@@ -250,7 +275,9 @@ def render_terminal():
         combat_lines = game_state.current_scene.combat(player_stats)
         player_attack_lines = []
         combat_timer = False
-    
+
+    if(game_state.in_camp):
+        output_lines.append("You are in camp. A small fire roars and brings heat and brief comfort.")
     # Render the output lines
     y = 350
 
@@ -325,6 +352,7 @@ def parse_input():
 
     if not game_state.current_scene.in_combat:
         if(commands[0].upper() == "MOVE"):
+            game_state.in_camp = False
             game_state.update_player_position(commands[1])
             #Once you move you need to reset any dialog/npc interactions
             dialog_lines = []
@@ -372,9 +400,14 @@ def parse_input():
 
         for item in player_stats["Inventory"]:
             if item['name'].upper() == food and item['type'] == "Food":
-                player_stats['Food'] += item['value']
-
-                player_stats['Inventory'].remove(item)
+                if game_state.in_camp:
+                    player_stats['Food'] += item['value']
+                    if player_stats['Hit Points'] < player_stats['Max_Hit_Points']:
+                        player_stats['Hit Points'] += item['value']
+                    player_stats['Inventory'].remove(item)
+                else:
+                    player_stats['Food'] += item['value']
+                    player_stats['Inventory'].remove(item)
 
     if commands[0].upper() == "EQUIP" and len(commands) > 1:
         if len(commands) == 3:
@@ -408,6 +441,10 @@ def parse_input():
                     inventory_lines.append("--------------------------------------")
                     inventory_lines.append("Lootable NPCS")
                     inventory_lines.append(npc.name)
+    
+    if commands[0].upper() == "CAMP":
+        if game_state.current_scene.in_combat == False:
+            game_state.in_camp = not game_state.in_camp
 
 
 
@@ -467,7 +504,8 @@ while True:
         render_terminal()
         render_stats(screen, font, player_stats)
         render_graphics()
-
+        if(game_state.in_camp):
+            render_camp()
 
 
         # Check timers
