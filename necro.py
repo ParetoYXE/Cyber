@@ -411,117 +411,120 @@ def parse_input():
 
     commands = input_text.split(" ")
 
+    if game_state.in_building == False:
+        if not game_state.current_scene.in_combat:
+            if(commands[0].upper() == "MOVE"):
+                game_state.in_camp = False
+                game_state.update_player_position(commands[1])
+                #Once you move you need to reset any dialog/npc interactions
+                dialog_lines = []
+                rumor_lines = []
+                inventory_lines = []
+                player_attack_lines = []
+                npc_in_dialog = None
+                in_dialog = False
 
-    if not game_state.current_scene.in_combat:
-        if(commands[0].upper() == "MOVE"):
-            game_state.in_camp = False
-            game_state.update_player_position(commands[1])
-            #Once you move you need to reset any dialog/npc interactions
-            dialog_lines = []
-            rumor_lines = []
-            inventory_lines = []
-            player_attack_lines = []
-            npc_in_dialog = None
-            in_dialog = False
+        if commands[0].upper() == "ATTACK" and len(commands) > 1:
+            for npc in game_state.current_scene.npcs:
+                if(commands[1].upper() == npc.name.upper() and npc.hp > 0):
+                    player_attack_lines = game_state.player_attack(npc,player_stats)
 
-    if commands[0].upper() == "ATTACK" and len(commands) > 1:
-        for npc in game_state.current_scene.npcs:
-            if(commands[1].upper() == npc.name.upper() and npc.hp > 0):
-                player_attack_lines = game_state.player_attack(npc,player_stats)
+        if commands[0].upper() == "TALK" and len(commands) > 1:
+            for npc in game_state.current_scene.npcs:
+                if(commands[1].upper() == npc.name.upper()):
+                    print(npc.dialog)
+                    dialog_lines = game_state.talk(npc)
+                    in_dialog = True
+                    npc_in_dialog = npc
 
-    if commands[0].upper() == "TALK" and len(commands) > 1:
-        for npc in game_state.current_scene.npcs:
-            if(commands[1].upper() == npc.name.upper()):
-                print(npc.dialog)
-                dialog_lines = game_state.talk(npc)
-                in_dialog = True
-                npc_in_dialog = npc
-
-    if commands[0].upper() == "ENTER" and len(commands) > 1:
-        if len(commands) > 2:
-            building_name = commands[1] + " " + commands[2]
-        else:
-            building_name = commands[1]
-
-
-        
-        for building in game_state.current_scene.buildings:
-            if(building_name.upper() == building.upper()):
-                game_state.in_building = True
-                print(game_state.building)
-                print(building_dict)
-                game_state.building = building_dict[building_name]
-
-
-    if commands[0].upper() == "RUMOR" and in_dialog == True:
-        if npc_in_dialog.rumor != []:
-            rumor_lines = npc_in_dialog.rumor
-
-    if commands[0].upper() == "BUY" and in_dialog == True:
-        if npc_in_dialog.goods != []:
-            if len(commands) == 1:
-                buy_lines = game_state.buy(npc_in_dialog,player_stats)
+        if commands[0].upper() == "ENTER" and len(commands) > 1:
+            if len(commands) > 2:
+                building_name = commands[1] + " " + commands[2]
             else:
-                buy_lines = game_state.buy(npc_in_dialog,player_stats,commands[1])
+                building_name = commands[1]
 
-    if commands[0].upper() == "INVENTORY":
-        for i in player_stats["Inventory"]:
-            inventory_lines.append(i['name'])
-    
-    if commands[0].upper() == "EAT" and len(commands) > 1:
-        if len(commands) > 2:
-            food = commands[1].upper() + " " + commands[2].upper()
-        else:
-            food = commands[1].upper()
 
-        for item in player_stats["Inventory"]:
-            if item['name'].upper() == food and item['type'] == "Food":
-                if game_state.in_camp:
-                    player_stats['Food'] += item['value']
-                    if player_stats['Hit Points'] < player_stats['Max_Hit_Points']:
-                        player_stats['Hit Points'] += item['value']
-                    player_stats['Inventory'].remove(item)
+            
+            for building in game_state.current_scene.buildings:
+                if(building_name.upper() == building.upper()):
+                    game_state.in_building = True
+                    print(game_state.building)
+                    print(building_dict)
+                    game_state.building = building_dict[building_name]
+
+
+        if commands[0].upper() == "RUMOR" and in_dialog == True:
+            if npc_in_dialog.rumor != []:
+                rumor_lines = npc_in_dialog.rumor
+
+        if commands[0].upper() == "BUY" and in_dialog == True:
+            if npc_in_dialog.goods != []:
+                if len(commands) == 1:
+                    buy_lines = game_state.buy(npc_in_dialog,player_stats)
                 else:
-                    player_stats['Food'] += item['value']
-                    player_stats['Inventory'].remove(item)
+                    buy_lines = game_state.buy(npc_in_dialog,player_stats,commands[1])
 
-    if commands[0].upper() == "EQUIP" and len(commands) > 1:
-        if len(commands) == 3:
-            item_equip  = commands[1].upper() + " " + commands[2].upper()
-        else:
-            item_equip = commands[1].upper()
+        if commands[0].upper() == "INVENTORY":
+            for i in player_stats["Inventory"]:
+                inventory_lines.append(i['name'])
+        
+        if commands[0].upper() == "EAT" and len(commands) > 1:
+            if len(commands) > 2:
+                food = commands[1].upper() + " " + commands[2].upper()
+            else:
+                food = commands[1].upper()
 
-        for item in player_stats['Inventory']:
-            if item['name'].upper() == item_equip:
-                item_type = item['type']
-                if item_type in player_stats:
-                    player_stats[item_type] = item
+            for item in player_stats["Inventory"]:
+                if item['name'].upper() == food and item['type'] == "Food":
+                    if game_state.in_camp:
+                        player_stats['Food'] += item['value']
+                        if player_stats['Hit Points'] < player_stats['Max_Hit_Points']:
+                            player_stats['Hit Points'] += item['value']
+                        player_stats['Inventory'].remove(item)
+                    else:
+                        player_stats['Food'] += item['value']
+                        player_stats['Inventory'].remove(item)
 
-    if commands[0].upper() == "LOOT":
-        if len(commands) > 1:
-            npc_loot = commands[1]
-            for npc in game_state.current_scene.npcs:
-                if npc.name.upper() == npc_loot.upper() and npc.hp <= 0:
-                    inventory_lines.append("--------------------------------------")
-                    inventory_lines.append("You loot " + npc_loot + " and receive")
-                    
-                    for item in npc.goods:
-                        inventory_lines.append(item['name'])
-                        player_stats['Inventory'].append(item)
-                    inventory_lines.append("--------------------------------------")
+        if commands[0].upper() == "EQUIP" and len(commands) > 1:
+            if len(commands) == 3:
+                item_equip  = commands[1].upper() + " " + commands[2].upper()
+            else:
+                item_equip = commands[1].upper()
+
+            for item in player_stats['Inventory']:
+                if item['name'].upper() == item_equip:
+                    item_type = item['type']
+                    if item_type in player_stats:
+                        player_stats[item_type] = item
+
+        if commands[0].upper() == "LOOT":
+            if len(commands) > 1:
+                npc_loot = commands[1]
+                for npc in game_state.current_scene.npcs:
+                    if npc.name.upper() == npc_loot.upper() and npc.hp <= 0:
+                        inventory_lines.append("--------------------------------------")
+                        inventory_lines.append("You loot " + npc_loot + " and receive")
+                        
+                        for item in npc.goods:
+                            inventory_lines.append(item['name'])
+                            player_stats['Inventory'].append(item)
+                        inventory_lines.append("--------------------------------------")
 
 
-        else:
-            for npc in game_state.current_scene.npcs:
-                if npc.hp <= 0:
-                    inventory_lines.append("--------------------------------------")
-                    inventory_lines.append("Lootable NPCS")
-                    inventory_lines.append(npc.name)
-    
-    if commands[0].upper() == "CAMP":
-        if game_state.current_scene.in_combat == False:
-            game_state.in_camp = not game_state.in_camp
+            else:
+                for npc in game_state.current_scene.npcs:
+                    if npc.hp <= 0:
+                        inventory_lines.append("--------------------------------------")
+                        inventory_lines.append("Lootable NPCS")
+                        inventory_lines.append(npc.name)
+        
+        if commands[0].upper() == "CAMP":
+            if game_state.current_scene.in_combat == False:
+                game_state.in_camp = not game_state.in_camp
 
+    else:
+        if commands[0].upper() == "EXIT":
+            game_state.in_building = False
 
 
         

@@ -5,3 +5,4 @@ class Building():
 		self.position = []
 		self.image = image
 		self.description = description
+		self.current_room = 0
