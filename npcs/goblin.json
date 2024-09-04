@@ -12,5 +12,7 @@
     }
   ],
   "hostile":"True",
-  "hp":20
+  "hp":20,
+  "image":"goblin.png",
+  "damage":[3,5]
 }

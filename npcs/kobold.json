@@ -12,7 +12,7 @@
     }
   ],
   "hostile":"True",
-  "hp":30,
+  "hp":5,
   "damage":[5,11],
   "image":"Kobold.png"
 }

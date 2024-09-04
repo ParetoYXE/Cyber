@@ -3,5 +3,6 @@
   "description": ["Nestled just off the river is the ruins of a Mill."],
   "npcs": [],
   "random_encounters":[],
-  "image":"Old_Mill_2.png"
+  "image":"Old_Mill_2.png",
+  "buildings":["Old Mill"]
 }

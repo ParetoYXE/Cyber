@@ -152,10 +152,17 @@ def load_buildings_from_folder(folder_path):
                 # Assuming each JSON file contains a single building object
                 building_name = building_data['name']
 
+
+                #Load Image
+
+                building_image = pygame.image.load(building_data['image'])
+
+
                 # Create a building object (assuming you have a Building class)
                 building = Building(
                     name=building_data['name'],
                     description=building_data['description'],
+                    image=building_image
                 )
                 
                 # Store the building object in the dictionary
@@ -191,9 +198,9 @@ def load_scenes_from_folder(folder_path, npc_dict):
 
                 if 'buildings' in scene_data:
                     buildings = scene_data['buildings']
-
                 if 'image' in scene_data:
                     scene_image = pygame.transform.scale(pygame.image.load(scene_data['image']),(450,200))
+
 
                 # Create a Scene object
                 scene = Scene(
@@ -241,7 +248,8 @@ npc_dict = load_npcs_from_folder(npc_folder_path)
 scene_folder_path = 'scenes'
 scene_dict = load_scenes_from_folder(scene_folder_path, npc_dict)
 
-
+building_folder_path = 'buildings'
+building_dict = load_buildings_from_folder(building_folder_path)
 
 
 game_map = generate_map(scene_dict, grid_size=10)
@@ -253,8 +261,6 @@ game_map[9][5] = scene_dict['Valley']
 game_map[9][6] = scene_dict['Hill_land']
 game_map[8][5] = scene_dict['Valley_2']
 game_map[7][5] = scene_dict['Old_Mill']
-
-
 
 
 
@@ -294,8 +300,19 @@ def render_graphics():
 
     if game_state.current_scene.npcs != None:
         for npc in game_state.current_scene.npcs:
-            npc_image = pygame.transform.scale(npc.image,(125,180))
-            screen.blit(npc_image,(275,150))
+            if npc.hp > 0 and npc.hostile == False:
+                npc_image = pygame.transform.scale(npc.image,(125,180))
+                screen.blit(npc_image,(275,150))
+
+
+
+
+
+def render_building():
+    building = building_dict[game_state.building.name]
+
+    screen.blit(building.image,(100,100))
+
 
 
 def render_camp():
@@ -420,6 +437,22 @@ def parse_input():
                 in_dialog = True
                 npc_in_dialog = npc
 
+    if commands[0].upper() == "ENTER" and len(commands) > 1:
+        if len(commands) > 2:
+            building_name = commands[1] + " " + commands[2]
+        else:
+            building_name = commands[1]
+
+
+        
+        for building in game_state.current_scene.buildings:
+            if(building_name.upper() == building.upper()):
+                game_state.in_building = True
+                print(game_state.building)
+                print(building_dict)
+                game_state.building = building_dict[building_name]
+
+
     if commands[0].upper() == "RUMOR" and in_dialog == True:
         if npc_in_dialog.rumor != []:
             rumor_lines = npc_in_dialog.rumor
@@ -432,10 +465,8 @@ def parse_input():
                 buy_lines = game_state.buy(npc_in_dialog,player_stats,commands[1])
 
     if commands[0].upper() == "INVENTORY":
-        inventory_lines.append("--------------------------------------")
         for i in player_stats["Inventory"]:
             inventory_lines.append(i['name'])
-        inventory_lines.append("--------------------------------------")
     
     if commands[0].upper() == "EAT" and len(commands) > 1:
         if len(commands) > 2:
@@ -549,6 +580,9 @@ while True:
         render_terminal()
         render_stats(screen, font, player_stats)
         render_graphics()
+
+        if(game_state.in_building):
+            render_building()
         if(game_state.in_camp):
             render_camp()
 

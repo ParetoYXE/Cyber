@@ -13,7 +13,7 @@ class Scene():
 		self.random_encounter_npcs = random_encounter_npcs
 		self.random_encounter_trigger = False
 		self.image = image
-		self.buildings = []
+		self.buildings = buildings
 
 	def check_encounter(self,player_stats):
 		if self.npcs != None:

@@ -10,6 +10,8 @@ class Game_state():
 		self.current_scene = over_world_map[self.overworld_y][self.overworld_x]
 		self.game_over = False
 		self.in_camp = False
+		self.in_building = False
+		self.building = None
 
 
 	def update_player_position(self,direction):

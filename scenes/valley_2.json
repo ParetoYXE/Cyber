@@ -15,8 +15,8 @@
   "npcs": [],
   "random_encounters":[
     {
-      "enemy":"Goblin",
-      "chance":10
+      "enemy":"Kobold",
+      "chance":35
 
     }
   ],
