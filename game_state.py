@@ -28,6 +28,13 @@ class Game_state():
 		self.update_current_scene()
 
 
+	def update_player_position_building(self,direction):
+		#TO DO
+		#This function needs to be setup so that when the player is moving within a building it will move them to the corresponding room
+		#Assuming there is a door to it and it is unlocked.
+		pass
+
+
 	def player_attack(self,npc,player_stats):
 		self.current_scene.in_combat = True
 		
