@@ -47,6 +47,7 @@ class Scene():
 
 
 	def combat(self,player_stats):
+		print(self.npcs)
 		enemy = self.npc_combat
 		
 		output_lines = []
@@ -64,5 +65,6 @@ class Scene():
 		else:
 			self.in_combat = False
 			self.npc_combat = None
+			self.npcs.remove(enemy)
 		
 		return output_lines

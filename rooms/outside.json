@@ -1,0 +1,11 @@
+{
+    "name": "Outside",
+    "doors":{
+        "North": {
+            "Locked": false,
+            "Room":"Main Hall"
+        }
+    },
+    "image": "Mill_Front.png",
+    "description": "The faded front of an old mill, its windows long broken and roof collapse. The door looks to be unlocked."
+}

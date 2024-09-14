@@ -14,11 +14,6 @@
   ,
   "npcs": [],
   "random_encounters":[
-    {
-      "enemy":"Kobold",
-      "chance":35
-
-    }
   ],
   "image":"valley_2.png"
 }

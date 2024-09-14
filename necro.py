@@ -135,9 +135,39 @@ def load_npcs_from_folder(folder_path):
     return npc_dict
 
 
+def load_rooms_from_folder(folder_path):
+    rooms_dict = {}
+
+    # Loop through all files in the directory
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.json'):
+            file_path = os.path.join(folder_path, filename)
+            
+            # Load the JSON data for each room
+            with open(file_path, 'r') as file:
+                room_data = json.load(file)
+
+                # Load room image if specified, otherwise set to None
+                room_image = pygame.image.load(room_data['image']) if room_data['image'] else None
+
+                # Create a Room object
+                room = Room(
+                    name=room_data['name'],
+                    description=room_data['description'],
+                    image=room_image,
+                    doors=room_data.get('doors', {})  # Get the doors, default to an empty dict if not provided
+                )
+                
+                # Store the Room object in the dictionary
+                rooms_dict[room.name] = room
+
+    return rooms_dict
 
 
-def load_buildings_from_folder(folder_path):
+
+
+
+def load_buildings_from_folder(folder_path, rooms_dict):
     buildings_dict = {}
 
     # Loop through all files in the directory
@@ -149,26 +179,33 @@ def load_buildings_from_folder(folder_path):
             with open(file_path, 'r') as file:
                 building_data = json.load(file)
 
-                # Assuming each JSON file contains a single building object
-                building_name = building_data['name']
-
-
-                #Load Image
-
+                # Load building image
                 building_image = pygame.image.load(building_data['image'])
 
+                # Create a list to store room objects
+                building_rooms = []
 
-                # Create a building object (assuming you have a Building class)
+                # Loop through the room names in the building data
+                for room_name in building_data['rooms']:
+                    # Assuming room_name exists in the rooms_dict, get the corresponding Room object
+                    if room_name in rooms_dict:
+                        building_rooms.append(rooms_dict[room_name])
+                    else:
+                        print(f"Warning: Room '{room_name}' not found in rooms_dict.")
+
+                # Create the Building object
                 building = Building(
                     name=building_data['name'],
                     description=building_data['description'],
-                    image=building_image
+                    image=building_image,
+                    rooms=building_rooms  # Pass the list of Room objects
                 )
                 
-                # Store the building object in the dictionary
-                buildings_dict[building_name] = building
+                # Store the Building object in the dictionary
+                buildings_dict[building.name] = building
 
     return buildings_dict
+
 
 # Function to load all JSON files in the 'scenes' folder and create Scene objects
 def load_scenes_from_folder(folder_path, npc_dict):
@@ -244,23 +281,33 @@ def generate_map(scene_dict, grid_size=10):
 npc_folder_path = 'npcs'
 npc_dict = load_npcs_from_folder(npc_folder_path)
 
+
+rooms_folder_path = 'rooms'
+rooms_dict = load_rooms_from_folder(rooms_folder_path)
+
+
 # Load all Scenes from the 'scenes' folder
 scene_folder_path = 'scenes'
 scene_dict = load_scenes_from_folder(scene_folder_path, npc_dict)
 
 building_folder_path = 'buildings'
-building_dict = load_buildings_from_folder(building_folder_path)
-
+building_dict = load_buildings_from_folder(building_folder_path,rooms_dict)
 
 game_map = generate_map(scene_dict, grid_size=10)
 
 
 
+print(scene_dict)
 game_map[9][4] = scene_dict['Hill_land']
 game_map[9][5] = scene_dict['Valley']
 game_map[9][6] = scene_dict['Hill_land']
 game_map[8][5] = scene_dict['Valley_2']
 game_map[7][5] = scene_dict['Old_Mill']
+game_map[7][6] = scene_dict['Forest']
+game_map[6][6] = scene_dict['Inn_Outside']
+
+
+
 
 
 
@@ -310,8 +357,9 @@ def render_graphics():
 
 def render_building():
     building = building_dict[game_state.building.name]
+    current_room = building.current_room
 
-    screen.blit(building.image,(100,100))
+    screen.blit(building.rooms[current_room].image,(100,100))
 
 
 
@@ -340,6 +388,19 @@ def render_terminal():
 
     if(game_state.in_camp):
         output_lines.append("You are in camp. A small fire roars and brings heat and brief comfort.")
+    if(game_state.in_building):
+
+        output_lines.append(game_state.building.description)
+        
+        current_room = game_state.building.current_room
+        doors = game_state.building.rooms[current_room].doors
+        
+        directions = ['North', 'East', 'South', 'West']
+
+        for i in directions:
+            if i in doors:
+                output_lines.append("There is a door to the " + i)
+
     # Render the output lines
     y = 350
 
@@ -448,9 +509,9 @@ def parse_input():
             for building in game_state.current_scene.buildings:
                 if(building_name.upper() == building.upper()):
                     game_state.in_building = True
-                    print(game_state.building)
-                    print(building_dict)
-                    game_state.building = building_dict[building_name]
+
+                    game_state.building = building_dict[building]
+                    game_state.room = building_dict[building].rooms[0]
 
 
         if commands[0].upper() == "RUMOR" and in_dialog == True:
@@ -465,9 +526,10 @@ def parse_input():
                     buy_lines = game_state.buy(npc_in_dialog,player_stats,commands[1])
 
         if commands[0].upper() == "INVENTORY":
+            inventory_lines.append("--------------------------------------")
             for i in player_stats["Inventory"]:
                 inventory_lines.append(i['name'])
-        
+            inventory_lines.append("--------------------------------------")
         if commands[0].upper() == "EAT" and len(commands) > 1:
             if len(commands) > 2:
                 food = commands[1].upper() + " " + commands[2].upper()
@@ -523,8 +585,11 @@ def parse_input():
                 game_state.in_camp = not game_state.in_camp
 
     else:
-        if commands[0].upper() == "EXIT":
+        if commands[0].upper() == "EXIT":   
             game_state.in_building = False
+        elif commands[0].upper() == "MOVE":
+            direction = commands[1]
+            game_state.update_player_position_building(direction,rooms_dict)
 
 
         
@@ -564,6 +629,10 @@ timer_food_consumption = pygame.time.get_ticks()
 timer_random_encounter = pygame.time.get_ticks()
 
 
+pygame.mixer.music.load("Main_Loop.wav")
+
+pygame.mixer.music.play(loops=1)
+
 
 
 # MAIN LOOP
@@ -573,7 +642,6 @@ while True:
             pygame.quit()
             exit()
         handle_event(event)
-
 
 
 

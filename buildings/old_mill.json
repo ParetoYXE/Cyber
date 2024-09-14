@@ -1,6 +1,6 @@
 {
     "name": "Old Mill",
-    "rooms": ["Main Hall", "Storage Room", "Broken Staircase", "Basement"],
+    "rooms": ["Outside", "Main Hall"],
     "position": [2, 4],
     "image": "Mill_Front.png",
     "description": "An old abandoned haunting mill."

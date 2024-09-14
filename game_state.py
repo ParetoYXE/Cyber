@@ -12,6 +12,7 @@ class Game_state():
 		self.in_camp = False
 		self.in_building = False
 		self.building = None
+		self.room = None
 
 
 	def update_player_position(self,direction):
@@ -28,11 +29,21 @@ class Game_state():
 		self.update_current_scene()
 
 
-	def update_player_position_building(self,direction):
+	def update_player_position_building(self,direction,rooms_dict):
 		#TO DO
 		#This function needs to be setup so that when the player is moving within a building it will move them to the corresponding room
 		#Assuming there is a door to it and it is unlocked.
-		pass
+		room = self.room
+
+		if direction in room.doors:
+			door = room.doors[direction]
+			next_room = door['Room']
+			count = 0
+			for room_search in self.building.rooms:
+				if next_room == room_search.name:
+					self.room = room_search
+					self.building.current_room = count
+				count+=1
 
 
 	def player_attack(self,npc,player_stats):

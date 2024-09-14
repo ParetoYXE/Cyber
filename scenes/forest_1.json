@@ -1,0 +1,14 @@
+{
+  "name":"Forest",
+  "description": ["A small woodland with a road running north."]
+  ,
+  "npcs": [],
+  "random_encounters":[
+    {
+      "enemy":"Goblin",
+      "chance":25
+
+    }
+  ],
+  "image":"forest_1.png"
+}

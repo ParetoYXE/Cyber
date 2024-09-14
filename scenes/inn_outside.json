@@ -1,0 +1,9 @@
+{
+  "name":"Inn_Outside",
+  "description": ["Nestled just off the road is a well lit Inn where muffled voices can be heard."]
+  ,
+  "npcs": [],
+  "random_encounters":[],
+  "image":"Inn_outside.png",
+  "buildings":["Inn"]
+}

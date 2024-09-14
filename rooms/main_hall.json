@@ -1,0 +1,11 @@
+{
+    "name": "Main Hall",
+    "doors": {
+        "South": {
+            "Locked": false,
+            "Room":"Outside"
+        }
+    },
+    "image": "Mill_Main_Chamber.png",
+    "description": "What remains of the main chamber is littered with debris and foliage."
+}

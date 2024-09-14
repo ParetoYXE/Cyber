@@ -1,0 +1,7 @@
+{
+    "name": "Inn",
+    "rooms": ["Common Room"],
+    "position": [2, 4],
+    "image": "Inn_Common_Room.png",
+    "description": ""
+}
